@@ -59,7 +59,7 @@ func TestHome(t *testing.T) {
 	assert.Equal(t, "Anubis AI Core-Backend", response.API)
 	assert.Equal(t, "1.0.0", response.Version)
 	assert.False(t, response.Timestamp.IsZero())
-	assert.Contains(t, response.Endpoints, "/health-check")
-	assert.Contains(t, response.Endpoints, "/available-tasks")
-	assert.Contains(t, response.Endpoints, "/execute-task")
+	assert.Contains(t, response.Endpoints, "GET /health-check - System health status")
+	assert.Contains(t, response.Endpoints, "GET /available-tasks - List supported ThreeFold Grid tasks")
+	assert.Contains(t, response.Endpoints, "POST /execute-task - Execute ThreeFold Grid tasks")
 }

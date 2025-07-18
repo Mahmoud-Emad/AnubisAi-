@@ -14,21 +14,21 @@ import (
 // It provides consistent error formatting across all endpoints with
 // detailed error information and context.
 type ErrorResponse struct {
-	Error     string    `json:"error" example:"Bad Request"`                    // High-level error category
-	Message   string    `json:"message" example:"Invalid request parameters"`   // Detailed error description
-	Timestamp time.Time `json:"timestamp" example:"2024-01-01T12:00:00Z"`      // When the error occurred
-	Path      string    `json:"path,omitempty" example:"/api/v1/users"`        // Request path that caused the error
-	RequestID string    `json:"request_id,omitempty" example:"req_123456789"`  // Unique request identifier for tracing
+	Error     string    `json:"error" example:"Bad Request"`                  // High-level error category
+	Message   string    `json:"message" example:"Invalid request parameters"` // Detailed error description
+	Timestamp time.Time `json:"timestamp" example:"2024-01-01T12:00:00Z"`     // When the error occurred
+	Path      string    `json:"path,omitempty" example:"/api/v1/users"`       // Request path that caused the error
+	RequestID string    `json:"request_id,omitempty" example:"req_123456789"` // Unique request identifier for tracing
 }
 
 // SuccessResponse represents a standard success response for the API.
 // It provides consistent success formatting with optional data payload.
 type SuccessResponse struct {
-	Success   bool        `json:"success" example:"true"`                       // Always true for success responses
-	Data      interface{} `json:"data,omitempty"`                              // Response payload (optional)
+	Success   bool        `json:"success" example:"true"`                           // Always true for success responses
+	Data      interface{} `json:"data,omitempty"`                                   // Response payload (optional)
 	Message   string      `json:"message,omitempty" example:"Operation successful"` // Success message (optional)
-	Timestamp time.Time   `json:"timestamp" example:"2024-01-01T12:00:00Z"`    // Response timestamp
-	RequestID string      `json:"request_id,omitempty" example:"req_123456789"` // Request identifier for tracing
+	Timestamp time.Time   `json:"timestamp" example:"2024-01-01T12:00:00Z"`         // Response timestamp
+	RequestID string      `json:"request_id,omitempty" example:"req_123456789"`     // Request identifier for tracing
 }
 
 // PaginationMeta represents pagination metadata
@@ -42,9 +42,9 @@ type PaginationMeta struct {
 // PaginatedResponse represents a paginated response for list endpoints.
 // It includes both the data and pagination metadata for proper client handling.
 type PaginatedResponse struct {
-	Data       interface{}    `json:"data"`                                    // The actual data items
-	Pagination PaginationMeta `json:"pagination"`                              // Pagination metadata
-	Timestamp  time.Time      `json:"timestamp" example:"2024-01-01T12:00:00Z"` // Response timestamp
+	Data       interface{}    `json:"data"`                                         // The actual data items
+	Pagination PaginationMeta `json:"pagination"`                                   // Pagination metadata
+	Timestamp  time.Time      `json:"timestamp" example:"2024-01-01T12:00:00Z"`     // Response timestamp
 	RequestID  string         `json:"request_id,omitempty" example:"req_123456789"` // Request identifier
 }
 

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"anubis-backend/common"
 	"anubis-backend/config"
-	"anubis-backend/handlers"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -52,7 +52,7 @@ func Recovery() fiber.Handler {
 			}
 
 			// Return structured error response
-			response := handlers.ErrorResponse{
+			response := common.ErrorResponse{
 				Error:     "Internal Server Error",
 				Message:   errorMsg,
 				Timestamp: time.Now(),
@@ -95,7 +95,7 @@ func RateLimit(cfg *config.Config) fiber.Handler {
 		},
 		LimitReached: func(c *fiber.Ctx) error {
 			// Custom rate limit exceeded response
-			response := handlers.ErrorResponse{
+			response := common.ErrorResponse{
 				Error:     "Rate limit exceeded",
 				Message:   fmt.Sprintf("Too many requests. Limit: %d requests per minute. Please try again later.", cfg.API.RateLimit),
 				Timestamp: time.Now(),
@@ -121,7 +121,7 @@ func AuthRequired() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			response := handlers.ErrorResponse{
+			response := common.ErrorResponse{
 				Error:     "Authorization required",
 				Message:   "Missing Authorization header. Please provide a valid JWT token.",
 				Timestamp: time.Now(),
@@ -133,7 +133,7 @@ func AuthRequired() fiber.Handler {
 
 		// Validate Bearer token format
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			response := handlers.ErrorResponse{
+			response := common.ErrorResponse{
 				Error:     "Invalid authorization format",
 				Message:   "Authorization header must start with 'Bearer ' followed by a valid JWT token",
 				Timestamp: time.Now(),
@@ -146,7 +146,7 @@ func AuthRequired() fiber.Handler {
 		// Extract and validate token
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 		if token == "" {
-			response := handlers.ErrorResponse{
+			response := common.ErrorResponse{
 				Error:     "Missing token",
 				Message:   "No token provided in Authorization header",
 				Timestamp: time.Now(),
@@ -159,7 +159,7 @@ func AuthRequired() fiber.Handler {
 		// TODO: Implement actual JWT validation with proper secret verification
 		// For development, accept any token that starts with "mock-jwt-token"
 		if !strings.HasPrefix(token, "mock-jwt-token") {
-			response := handlers.ErrorResponse{
+			response := common.ErrorResponse{
 				Error:     "Invalid token",
 				Message:   "Token validation failed. Please provide a valid JWT token.",
 				Timestamp: time.Now(),

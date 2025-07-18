@@ -1,6 +1,6 @@
 # Anubis AI Core-Backend Makefile
 
-.PHONY: help build test test-unit test-integration clean run dev deps swagger lint fmt vet docker-build docker-run
+.PHONY: help build test test-unit test-integration clean run dev deps swagger swag lint fmt vet docker-build docker-run
 
 # Default target
 help:
@@ -13,7 +13,7 @@ help:
 	@echo "  test-integration - Run integration tests"
 	@echo "  clean            - Clean build artifacts"
 	@echo "  deps             - Download dependencies"
-	@echo "  swagger          - Generate Swagger documentation"
+	@echo "  swagger/swag     - Generate Swagger documentation"
 	@echo "  lint             - Run linter"
 	@echo "  fmt              - Format code"
 	@echo "  vet              - Run go vet"
@@ -71,9 +71,14 @@ swagger:
 	@echo "Generating Swagger documentation..."
 	@if command -v swag >/dev/null 2>&1; then \
 		swag init; \
+	elif [ -f "$(HOME)/go/bin/swag" ]; then \
+		$(HOME)/go/bin/swag init; \
 	else \
 		echo "Swag not found. Install with: go install github.com/swaggo/swag/cmd/swag@latest"; \
 	fi
+
+# Alias for swagger command
+swag: swagger
 
 # Format code
 fmt:

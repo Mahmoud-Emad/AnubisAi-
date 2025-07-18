@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// User represents a user in the system
+// User represents a user in the system with decentralized identity support
 type User struct {
 	ID        uuid.UUID `json:"id" gorm:"type:char(36);primary_key"`
 	Email     string    `json:"email" gorm:"uniqueIndex;not null" validate:"required,email"`
@@ -15,15 +15,27 @@ type User struct {
 	Password  string    `json:"-" gorm:"not null" validate:"required,min=8"`
 	FirstName string    `json:"first_name" gorm:"not null" validate:"required,min=1,max=100"`
 	LastName  string    `json:"last_name" gorm:"not null" validate:"required,min=1,max=100"`
-	IsActive  bool      `json:"is_active" gorm:"default:true"`
-	IsAdmin   bool      `json:"is_admin" gorm:"default:false"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+
+	// Decentralized Identity Fields
+	WalletAddress string `json:"wallet_address" gorm:"uniqueIndex"` // TFChain wallet address
+	TwinID        *int64 `json:"twin_id,omitempty" gorm:"index"`    // ThreeFold Digital Twin ID
+	PublicKey     string `json:"public_key,omitempty"`              // Wallet public key
+	Network       string `json:"network" gorm:"default:'test'"`     // TFChain network (main/test/qa/dev)
+	HasWallet     bool   `json:"has_wallet" gorm:"default:false"`   // User provided existing wallet
+
+	// Status Fields
+	IsActive      bool `json:"is_active" gorm:"default:true"`
+	IsAdmin       bool `json:"is_admin" gorm:"default:false"`
+	EmailVerified bool `json:"email_verified" gorm:"default:false"`
+
+	// Timestamps
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relationships
-	Settings []UserSetting `json:"settings,omitempty" gorm:"foreignKey:UserID"`
-	Memories []UserMemory  `json:"memories,omitempty" gorm:"foreignKey:UserID"`
+	Settings []UserSetting   `json:"settings,omitempty" gorm:"foreignKey:UserID"`
+	Memories []UserMemory    `json:"memories,omitempty" gorm:"foreignKey:UserID"`
 	Tasks    []TaskExecution `json:"tasks,omitempty" gorm:"foreignKey:UserID"`
 }
 
@@ -58,14 +70,14 @@ func (us *UserSetting) BeforeCreate(tx *gorm.DB) error {
 
 // UserMemory represents AI memories for a user
 type UserMemory struct {
-	ID        uuid.UUID `json:"id" gorm:"type:char(36);primary_key"`
-	UserID    uuid.UUID `json:"user_id" gorm:"type:char(36);not null;index"`
-	Title     string    `json:"title" gorm:"not null" validate:"required,max=200"`
-	Content   string    `json:"content" gorm:"type:text;not null" validate:"required"`
-	Tags      string    `json:"tags" gorm:"type:text"` // JSON array as string
-	IsActive  bool      `json:"is_active" gorm:"default:true"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID      `json:"id" gorm:"type:char(36);primary_key"`
+	UserID    uuid.UUID      `json:"user_id" gorm:"type:char(36);not null;index"`
+	Title     string         `json:"title" gorm:"not null" validate:"required,max=200"`
+	Content   string         `json:"content" gorm:"type:text;not null" validate:"required"`
+	Tags      string         `json:"tags" gorm:"type:text"` // JSON array as string
+	IsActive  bool           `json:"is_active" gorm:"default:true"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relationships
@@ -82,16 +94,16 @@ func (um *UserMemory) BeforeCreate(tx *gorm.DB) error {
 
 // TaskExecution represents a task execution record
 type TaskExecution struct {
-	ID          uuid.UUID `json:"id" gorm:"type:char(36);primary_key"`
-	UserID      uuid.UUID `json:"user_id" gorm:"type:char(36);index"`
-	TaskName    string    `json:"task_name" gorm:"not null" validate:"required"`
-	Parameters  string    `json:"parameters" gorm:"type:text"` // JSON as string
-	Response    string    `json:"response" gorm:"type:text"`   // JSON as string
-	Status      string    `json:"status" gorm:"not null;default:'pending'" validate:"required,oneof=pending running success failed"`
-	ErrorMsg    string    `json:"error_message,omitempty" gorm:"type:text"`
-	Duration    int64     `json:"duration_ms,omitempty"` // Duration in milliseconds
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID         uuid.UUID `json:"id" gorm:"type:char(36);primary_key"`
+	UserID     uuid.UUID `json:"user_id" gorm:"type:char(36);index"`
+	TaskName   string    `json:"task_name" gorm:"not null" validate:"required"`
+	Parameters string    `json:"parameters" gorm:"type:text"` // JSON as string
+	Response   string    `json:"response" gorm:"type:text"`   // JSON as string
+	Status     string    `json:"status" gorm:"not null;default:'pending'" validate:"required,oneof=pending running success failed"`
+	ErrorMsg   string    `json:"error_message,omitempty" gorm:"type:text"`
+	Duration   int64     `json:"duration_ms,omitempty"` // Duration in milliseconds
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 
 	// Relationships
 	User *User `json:"user,omitempty" gorm:"foreignKey:UserID"`
@@ -107,12 +119,12 @@ func (te *TaskExecution) BeforeCreate(tx *gorm.DB) error {
 
 // PasswordReset represents password reset tokens
 type PasswordReset struct {
-	ID        uuid.UUID `json:"id" gorm:"type:char(36);primary_key"`
-	UserID    uuid.UUID `json:"user_id" gorm:"type:char(36);not null;index"`
-	Token     string    `json:"token" gorm:"uniqueIndex;not null"`
-	ExpiresAt time.Time `json:"expires_at" gorm:"not null"`
+	ID        uuid.UUID  `json:"id" gorm:"type:char(36);primary_key"`
+	UserID    uuid.UUID  `json:"user_id" gorm:"type:char(36);not null;index"`
+	Token     string     `json:"token" gorm:"uniqueIndex;not null"`
+	ExpiresAt time.Time  `json:"expires_at" gorm:"not null"`
 	UsedAt    *time.Time `json:"used_at,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time  `json:"created_at"`
 
 	// Relationships
 	User User `json:"-" gorm:"foreignKey:UserID"`
